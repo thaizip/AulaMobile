@@ -1,27 +1,55 @@
+
 import React from 'react';
-import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
- 
-export default function AppItem(props){
+import { StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native';
+import Database from './Database';
+
+export default function AppItem(props) {
+    async function handleEditPress() {
+        const item = await Database.getItem(props.id);
+        props.navigation.navigate("AppForm", item);
+    }
+
+    function handleDeletePress() {
+        Alert.alert(
+            "Atenção",
+            "Você tem certeza que deseja excluir este item?",
+            [
+                {
+                    text: "Não",
+                    onPress: () => console.log("Cancel Pressed"),
+                    style: "cancel"
+                },
+                {
+                    text: "Sim", onPress: () => {
+                        Database.deleteItem(props.id)
+                            .then(response => props.navigation.navigate("AppList", { id: props.id }));
+                    }
+                }
+            ],
+            { cancelable: false }
+        );
+    }
     return (
         <View style={styles.container}>
-          <Text style={styles.textItem}>{props.item}</Text>
-          <View style={styles.buttonsContainer}>
-            <TouchableOpacity style={styles.deleteButton} > 
-                <Text style={styles.buttonText}>X</Text> 
-            </TouchableOpacity> 
-            <TouchableOpacity style={styles.editButton} > 
-                <Text style={styles.buttonText}>Editar</Text> 
-            </TouchableOpacity> 
-          </View>
+            <Text style={styles.textItem}>{props.item}</Text>
+            <View style={styles.buttonsContainer}>
+                <TouchableOpacity style={styles.deleteButton} onPress={handleDeletePress} >
+                    <Text style={styles.buttonText}>X</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.editButton} onPress={handleEditPress}>
+                    <Text style={styles.buttonText}>Editar</Text>
+                </TouchableOpacity>
+            </View>
         </View>
-      );
+    );
 }
+
 
 const styles = StyleSheet.create({
     container: {
-      backgroundColor: '#fff',
-      marginTop: 20,
-      width: '100%'
+        backgroundColor: '#fff',
+        marginTop: 20,
+        width: '100%'
     },
     buttonsContainer: {
         flexDirection: 'row-reverse',
@@ -63,4 +91,4 @@ const styles = StyleSheet.create({
     textItem: {
         fontSize: 20,
     }
-  });
+});
